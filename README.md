@@ -6,13 +6,20 @@ person's expression (`SMILE` or `NEUTRAL`) and eye state (`EYES_OPEN` or
 
 ## Setup
 
-Use Python 3.11, then install dependencies:
+Install system packages, then use Python 3.11 to create a virtual environment
+and install dependencies:
 
-```powershell
-py -3.11 -m venv .venv
-.venv\Scripts\Activate.ps1
+```bash
+sudo apt update
+sudo apt install -y python3.11 python3.11-venv python3-pip
+python3.11 -m venv .venv
+source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
+
+If `python3.11` is not available in your Kali repositories, install it with
+`pyenv` or use the default `python3` (check with `python3 --version`) and
+adjust the `venv` command accordingly.
 
 Place a compatible ArcFace ONNX model at either:
 
@@ -25,7 +32,7 @@ Model weights and face databases are deliberately ignored by Git.
 
 ## Enroll identities
 
-```powershell
+```bash
 python -m src.enroll --name="Enrolled_name"
 ```
 
@@ -36,20 +43,39 @@ the requested sample count, or `q` to quit. Enrollment is stored locally at
 To keep your existing enrollments when moving from the original project,
 copy these local files yourself (do not commit them):
 
-```text
-old-project/data/db/face_db.npz -> FaceLocking/data/db/face_db.npz
-old-project/data/db/face_db.json -> FaceLocking/data/db/face_db.json
+```bash
+cp old-project/data/db/face_db.npz FaceLocking/data/db/face_db.npz
+cp old-project/data/db/face_db.json FaceLocking/data/db/face_db.json
+```
+
+Create the destination folder first if it does not exist:
+
+```bash
+mkdir -p FaceLocking/data/db
 ```
 
 ## Track one person
 
-```powershell
+```bash
 python -m src.face_tracking --name="Enrolled_name"
 ```
 
 `--name` must be an exact enrolled name. The tracker shows `NOT_DETECTED`
 when that person leaves the frame and does not switch to another face. Press
 `Q` to quit.
+
+## Webcam access
+
+If the camera cannot be opened, make sure your user can access video devices:
+
+```bash
+ls /dev/video*
+sudo usermod -aG video $USER
+```
+
+Log out and back in for the group change to take effect. If you are running
+Kali in a virtual machine, attach the webcam to the VM from your hypervisor's
+USB/device menu.
 
 ## Tuning signals
 
